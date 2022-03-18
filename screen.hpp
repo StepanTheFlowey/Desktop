@@ -2,7 +2,6 @@
 #include "types.h"
 #include "creatorArray.hpp"
 #include "creator.hpp"
-
 //Containers
 #include <vector>
 
@@ -21,85 +20,103 @@ class Creator;
 class Scene;
 
 class Screen {
-  sf::RenderWindow window_;
 public:
+  sf::RenderWindow window;
   sf::Event event;
-  sf::Color clearColor;
-  std::vector<sf::VertexBuffer> vertexBuffers;
-  std::vector<sf::Text> texts;
-  std::vector<sf::Font> fonts;
 
-  Screen() {
-    throw;
-  }
+  Screen():window(), event() {}
 
-  Screen(sf::ContextSettings contextSettings):window_(sf::VideoMode::getDesktopMode(), "", sf::Style::None, contextSettings), event() {
-    window_.setVerticalSyncEnabled(true);
+  void init() {
+    sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
+    videoMode.height--;
+
+    sf::ContextSettings contextSettings;
+    contextSettings.antialiasingLevel = 0;
+
+    window.create(videoMode, "", sf::Style::None, contextSettings);
+    //window.setFramerateLimit(60);
+    window.setVerticalSyncEnabled(true);
 
     //Window transperency magic
-    LONG result = SetWindowLongW(window_.getSystemHandle(), GWL_STYLE, WS_POPUP | WS_VISIBLE);
+    SetLastError(0);
+    LONG result = SetWindowLongW(window.getSystemHandle(), GWL_STYLE, WS_POPUP | WS_VISIBLE);
     if(result == 0) {
       std::wcout << L"Error!" << std::endl;
-      std::wcout << L"SetWindowLongW output is zero!" << std::endl;
-      _wsystem(L"pause");
+      std::wcout << L"SetWindowLongW(GWL_STYLE) output is zero!" << std::endl;
+      lastError();
+      //_wsystem(L"pause");
+      //exit(0);
     }
 
+    //result = SetWindowLongW(window.getSystemHandle(), GWL_EXSTYLE,  WS_EX_APPWINDOW);
+    //if(result == 0) {
+      //std::wcout << L"Error!" << std::endl;
+      //std::wcout << L"SetWindowLongW(GWL_EXSTYLE) output is zero!" << std::endl;
+      //lastError();
+      //_wsystem(L"pause");
+      //exit(0);
+    //}
+
     HRESULT hr = S_OK;
+
+    //DWMNCRENDERINGPOLICY ncrp = DWMNCRP_ENABLED;
+
+    //hr = DwmSetWindowAttribute(window.getSystemHandle(), DWMWA_NCRENDERING_POLICY, &ncrp, sizeof(ncrp));
+    //if(FAILED(hr)) {
+    //  std::wcout << L"Error!" << std::endl;
+    //  std::wcout << L"DwmSetWindowAttribute output:\n0x" << std::hex << hr << std::endl;
+    //  _wsystem(L"pause");
+    //  exit(0);
+    //}
+
+    //RECT extendedFrameBounds {0,0,0,0};
+    //hr = DwmGetWindowAttribute(window.getSystemHandle(), DWMWA_EXTENDED_FRAME_BOUNDS, &extendedFrameBounds, sizeof(extendedFrameBounds));
+
     BOOL compEn = false;
+    hr = S_OK;
     hr = DwmIsCompositionEnabled(&compEn);
     if(FAILED(hr)) {
       std::wcout << L"Error!" << std::endl;
       std::wcout << L"DwmIsCompositionEnabled output:\n0x" << std::hex << hr << std::endl;
       _wsystem(L"pause");
+      exit(0);
     }
     if(!compEn) {
       std::wcout << L"Error!" << std::endl;
       std::wcout << L"Composition disabled!" << std::endl;
       _wsystem(L"pause");
+      exit(0);
     }
 
     MARGINS margins = {-1};
     hr = S_OK;
-    hr = DwmExtendFrameIntoClientArea(window_.getSystemHandle(), &margins);
+    hr = DwmExtendFrameIntoClientArea(window.getSystemHandle(), &margins);
     if(FAILED(hr)) {
       std::wcout << L"Error!" << std::endl;
       std::wcout << L"DwmExtendFrameIntoClientArea output:\n0x" << std::hex << hr << std::endl;
       _wsystem(L"pause");
+      exit(0);
     }
   }
 
   void ignoreEvents() {
-    while(window_.pollEvent(event)) {
+    while(window.pollEvent(event)) {
       if(event.type == sf::Event::Closed) {
-        window_.close();
+        window.close();
         exit(0);
       }
     };
   }
 
   bool precessEvent() {
-    return window_.pollEvent(event);
+    return window.pollEvent(event);
   }
 
-  void draw() {
-    for(auto &i : vertexBuffers) {
-      window_.draw(i);
-    }
-    for(auto &i : texts) {
-      window_.draw(i);
-    }
-  }
-
-  void clear() {
-    window_.clear(clearColor);
-  }
-
-  void display() {
-    window_.display();
-  }
-
-  void play(Scene *scene);
+  int play(Scene *scene);
 
   friend Creator;
-  friend Scene;
+private:
+  void lastError() {
+    std::wcout << L"GetLastError(): 0x" << std::hex << GetLastError() << std::endl;
+  }
 };

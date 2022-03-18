@@ -9,7 +9,6 @@
 #include <fstream>
 
 //WinAPI
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Dwmapi.h>
 
@@ -36,12 +35,12 @@ template <typename T> double_t getAngle(sf::Vector2<T> A, sf::Vector2<T> B, sf::
   return std::acos((b * b + c * c - a * a) / (2 * b * c));
 }
 
-template <typename T> sf::Vector2<T> getRandomCreatorBeginPos() {
+sf::Vector2i getRandomCreatorBeginPos() {
   auto desktopMode = sf::VideoMode::getDesktopMode();
-  return sf::Vector2<T>(
+  return sf::Vector2i(
     rand() % 2 ? -1 * (rand() % desktopMode.width) : desktopMode.width + (rand() % desktopMode.width),
     rand() % 2 ? -1 * (rand() % desktopMode.height) : desktopMode.height + (rand() % desktopMode.height)
-    );
+  );
 }
 
 class CreatorArray;
@@ -49,8 +48,8 @@ class CreatorArray;
 class Creator {
   sf::VertexBuffer rect_;
   sf::VertexBuffer triangle_;
-  bool lifeTimer = false;
-  gametime_t lifeTime_ = 0;
+  bool deadable = false;
+  gametime_t lifeTime_ = -1;
   gametime_t timeCounter = 0;
   int16_t tWidth_ = -1;        //Target width
   int16_t sWidth_ = 0;         //Step width
@@ -60,6 +59,7 @@ public:
   sf::Vector2i beginPoint;
   sf::Vector2i endPoint;
   int16_t width = 0;
+  bool changed = false;
 
   Creator():rect_(sf::Quads, sf::VertexBuffer::Stream), triangle_(sf::TriangleFan, sf::VertexBuffer::Stream) {
     if(!rect_.create(4)) {
@@ -69,18 +69,15 @@ public:
     }
   }
 
-#ifdef DEBUG
-  sf::Vertex rect[4];
-#endif // DEBUG
   bool update(gametime_t time) {
-    if(lifeTimer) {
+    if(deadable && lifeTime_ != -1) {
       lifeTime_ -= time;
       if(lifeTime_ < 0) {
-        return false;
+        return true;
       }
     }
     if(tWidth_ != -1) {
-      if(width < tWidth_) {
+      if(width <= tWidth_) {
         width += time / iWidth_ * sWidth_;
         timeCounter += time - (time / iWidth_ * sWidth_) * iWidth_;
         if(timeCounter > iWidth_) {
@@ -107,11 +104,13 @@ public:
 
     }
     if(width <= 0) {
+      return deadable;
+    }
+
+    if(width == 0 || !changed) {
       return false;
     }
-#ifndef DEBUG
     sf::Vertex rect[4];
-#endif // DEBUG
     sf::Vector2i zeroPoint(beginPoint.x, endPoint.y);
     double_t angle = 0.0;
     if((beginPoint.x <= endPoint.x && beginPoint.y < endPoint.y) || (beginPoint.x >= endPoint.x && beginPoint.y > endPoint.y)) {
@@ -140,6 +139,7 @@ public:
     rect[3].color = sf::Color::Red;
 
     rect_.update(rect);
+
     sf::Vertex *tri = new sf::Vertex[width + 2];
     triangle_.create(width + 2);
     tri[0].position = sf::Vector2f(endPoint);
@@ -147,39 +147,24 @@ public:
     if(beginPoint.y <= endPoint.y) {
       angle += PI;
     }
+
     for(uint8_t i = 0; i < width + 1; i++) {
       tri[i + 1].position.x = sin(double_t(i * step) * DEG_TO_RAD + angle) * width / 2 + endPoint.x;
       tri[i + 1].position.y = cos(double_t(i * step) * DEG_TO_RAD + angle) * width / 2 + endPoint.y;
     }
+
     for(uint8_t i = 0; i < width + 2; i++) {
       tri[i].color = sf::Color::Red;
     }
     triangle_.update(tri);
     delete[] tri;
-    return true;
-    }
+    return false;
+  }
 
   void draw(Screen &screen) {
-    screen.window_.draw(rect_);
-    screen.window_.draw(triangle_);
-#ifdef DEBUG
-    sf::CircleShape c(6, 10);
-    c.setOrigin(sf::Vector2f(6, 6));
-    c.setPosition(rect[0].position);
-    screen.window_.draw(c);
-    c.setPosition(rect[1].position);
-    screen.window_.draw(c);
-    c.setPosition(rect[2].position);
-    screen.window_.draw(c);
-    c.setPosition(rect[3].position);
-    screen.window_.draw(c);
-    c.setFillColor(sf::Color::Cyan);
-    c.setPosition(sf::Vector2f(beginPoint.x, beginPoint.y));
-    screen.window_.draw(c);
-    c.setPosition(sf::Vector2f(endPoint.x, endPoint.y));
-    screen.window_.draw(c);
-#endif // DEBUG
+    screen.window.draw(rect_);
+    screen.window.draw(triangle_);
   }
 
   friend CreatorArray;
-  };
+};

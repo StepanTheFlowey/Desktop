@@ -82,8 +82,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Цветик\Documents\Programming\C++\Libraries\x64\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Цветик\Documents\Programming\C++\Libraries\x64\lib;$(WindowsSDK_LibraryPath_x64);$(VC_LibraryPath_x64)</LibraryPath>
+    <IncludePath>C:\Users\Flowey\Documents\Programming\C++\Libraries\x64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Flowey\Documents\Programming\C++\Libraries\x64\lib;$(WindowsSDK_LibraryPath_x64);$(VC_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -159,16 +159,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="creator.hpp" />
     <ClInclude Include="creatorArray.hpp" />
-    <ClInclude Include="cursor.hpp" />
     <ClInclude Include="scene.hpp" />
     <ClInclude Include="sceneMenu.hpp" />
+    <ClInclude Include="sceneMinecraft.hpp" />
     <ClInclude Include="sceneStart.hpp" />
-    <ClInclude Include="textures.hpp" />
     <ClInclude Include="types.h" />
     <ClInclude Include="screen.hpp" />
   </ItemGroup>

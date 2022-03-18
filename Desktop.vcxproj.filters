@@ -21,18 +21,12 @@
     <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="scene.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="screen.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="types.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="cursor.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="creator.hpp">
@@ -50,8 +44,8 @@
     <ClInclude Include="sceneMenu.hpp">
       <Filter>Файлы заголовков\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="textures.hpp">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="sceneMinecraft.hpp">
+      <Filter>Файлы заголовков\scenes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

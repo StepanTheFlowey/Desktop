@@ -28,11 +28,13 @@ public:
     if(id == 0) {
       throw std::out_of_range("no empty id for creator ray");
     }
-    creators_[id] = Creator();
-    creators_[id].beginPoint = begin;
-    creators_[id].endPoint = end;
-    creators_[id].lifeTime_ = lifeTime;
-    creators_[id].lifeTimer = lifeTime != -1;
+    Creator &creator = creators_[id];
+    creator = Creator();
+    creator.beginPoint = begin;
+    creator.endPoint = end;
+    creator.lifeTime_ = lifeTime;
+    creator.deadable = lifeTime != -1;
+    creator.changed = true;
     return id;
   }
 
@@ -41,27 +43,36 @@ public:
   }
 
   void changeBeginPos(ID_t index, sf::Vector2i begin) {
-    creators_[index].beginPoint = begin;
+    Creator &creator = creators_[index];
+    creator.beginPoint = begin;
+    creator.changed = true;
   }
 
   void changeEndPos(ID_t index, sf::Vector2i end) {
-    creators_[index].endPoint = end;
+    Creator &creator = creators_[index];
+    creator.endPoint = end;
+    creator.changed = true;
   }
 
   void changeColor(ID_t index, sf::Color color) {
-    creators_[index].color = color;
+    Creator &creator = creators_[index];
+    creator.color = color;
+    creator.changed = true;
   }
 
-  void changeWidth(ID_t index, int16_t width, int16_t targetWidth = -1, int16_t stepWidth = 0, int16_t interval = 0) {
-    creators_[index].width = width;
-    creators_[index].tWidth_ = targetWidth;
-    creators_[index].sWidth_ = std::abs(stepWidth);
-    creators_[index].iWidth_ = interval;
+  void changeWidth(ID_t index, int16_t width, int16_t targetWidth = -1, int16_t stepWidth = 0, int16_t interval = 0, bool deadable = false) {
+    Creator &creator = creators_[index];
+    creator.width = width;
+    creator.tWidth_ = targetWidth;
+    creator.sWidth_ = std::abs(stepWidth);
+    creator.iWidth_ = interval;
+    creator.deadable = deadable;
+    creator.changed = true;
   }
 
   void update(gametime_t time) {
     for(auto it = std::begin(creators_); it != std::end(creators_);) {
-      if(!it->second.update(time)) {
+      if(it->second.update(time)) {
         it = creators_.erase(it);
       }
       else {

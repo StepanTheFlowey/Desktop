@@ -3,12 +3,8 @@
 
 class Scene {
 public:
-  virtual int16_t getState() {
+  virtual int play(Screen *screen) {
     return NULL;
-  }
-
-  virtual void play(Screen *screen) {
-    return;
   }
 
   virtual void update() {
@@ -20,6 +16,6 @@ public:
   }
 };
 
-void Screen::play(Scene *scene) {
-  scene->play(this);
+int Screen::play(Scene *scene) {
+  return scene->play(this);
 }

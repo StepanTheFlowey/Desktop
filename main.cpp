@@ -1,5 +1,8 @@
-//Math
 #define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#define RAPIDJSON_HAS_STDSTRING true
+
+//Math
 #include <cmath>
 
 //Containers
@@ -12,7 +15,6 @@
 #include <fstream>
 
 //WinAPI
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Dwmapi.h>
 
@@ -26,6 +28,7 @@
 
 #include "sceneStart.hpp"
 #include "sceneMenu.hpp"
+#include "sceneMinecraft.hpp"
 
 bool warning() {
   return MessageBoxW(NULL, L"This application is dangerous\n\nDo you want to continue?", L"Warning", MB_YESNO | MB_ICONWARNING) == IDYES;
@@ -43,11 +46,12 @@ void save() {
   file.close();
 }
 
-template <class S> void playScene(Screen &screen) {
+template <class S> int playScene(Screen &screen) {
   Scene *scene = nullptr;
   scene = new S;
-  screen.play(scene);
+  int i=screen.play(scene);
   delete scene;
+  return i;
 }
 
 int main() {
@@ -56,14 +60,19 @@ int main() {
     return 0;
   }
 
-  sf::ContextSettings contextSettings;
-  contextSettings.antialiasingLevel = 8;
+  Screen screen;
+  screen.init();
 
-  Screen screen(contextSettings);
+#ifndef DEBUG
+  //FreeConsole();
+#endif //DEBUG
 
   playScene<SceneStart>(screen);
-#ifndef DEBUG
-  FreeConsole();
-#endif //DEBUG
-  playScene<SceneMenu>(screen);
+  switch(playScene<SceneMenu>(screen)) {
+    case 1:
+    {
+      playScene<SceneMinecraft>(screen);
+      break;
+    }
+  }
 }
